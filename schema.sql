@@ -1,25 +1,59 @@
+
+-- ---
+-- Table 'employees'
+-- 
+-- ---
+DROP DATABASE IF EXISTS employee_db;
+
 CREATE DATABASE employee_db;
 
 USE employee_db;
 
-CREATE TABLE employees (
-    id INT AUTO_INCREMENT NOT NULL,
-    first_name VARCHAR (100),
-    last_name VARCHAR (100),
-    role_id INT,
-    department VARCHAR (100),
-    salary INT,
-    manager_id INT,
-    primary key (id)
+DROP TABLE IF EXISTS `employees`;
+		
+CREATE TABLE `employees` (
+  `id` INTEGER NOT NULL AUTO_INCREMENT,
+  `first_name` VARCHAR(30) NOT NULL,
+  `last_name` VARCHAR(30) NOT NULL,
+  `role_id` INTEGER DEFAULT NULL,
+  `manager_id` INTEGER DEFAULT NULL,
+  PRIMARY KEY (`id`)
 );
 
-CREATE TABLE department (
-    name VARCHAR(30)
+-- ---
+-- Table 'role'
+-- 
+-- ---
+
+DROP TABLE IF EXISTS `role`;
+		
+CREATE TABLE `role` (
+  `id` INTEGER AUTO_INCREMENT NOT NULL,
+  `title` VARCHAR(30),
+  `salary` INT,
+  `department_id` INTEGER DEFAULT NULL,
+  PRIMARY KEY (`id`)
 );
 
-CREATE TABLE role (
-    title VARCHAR(30),
-    salary DECIMAL (7, 4),
-    department_id INT
-)
+-- ---
+-- Table 'departments'
+-- 
+-- ---
+
+DROP TABLE IF EXISTS `departments`;
+		
+CREATE TABLE `departments` (
+  `id` INTEGER NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(30),
+  PRIMARY KEY (`id`)
+);
+
+-- ---
+-- Foreign Keys 
+-- ---
+
+ALTER TABLE `employees` ADD FOREIGN KEY (role_id) REFERENCES `role` (`id`);
+ALTER TABLE `employees` ADD FOREIGN KEY (manager_id) REFERENCES `employees` (`id`);
+ALTER TABLE `role` ADD FOREIGN KEY (department_id) REFERENCES `departments` (`id`);
+
 
