@@ -9,9 +9,9 @@ CREATE DATABASE employee_db;
 
 USE employee_db;
 
-DROP TABLE IF EXISTS `employees`;
+DROP TABLE IF EXISTS `employee`;
 		
-CREATE TABLE `employees` (
+CREATE TABLE `employee` (
   `id` INTEGER NOT NULL AUTO_INCREMENT,
   `first_name` VARCHAR(30) NOT NULL,
   `last_name` VARCHAR(30) NOT NULL,
@@ -36,13 +36,13 @@ CREATE TABLE `role` (
 );
 
 -- ---
--- Table 'departments'
+-- Table 'department'
 -- 
 -- ---
 
-DROP TABLE IF EXISTS `departments`;
+DROP TABLE IF EXISTS `department`;
 		
-CREATE TABLE `departments` (
+CREATE TABLE `department` (
   `id` INTEGER NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(30),
   PRIMARY KEY (`id`)
@@ -52,8 +52,7 @@ CREATE TABLE `departments` (
 -- Foreign Keys 
 -- ---
 
-ALTER TABLE `employees` ADD FOREIGN KEY (role_id) REFERENCES `role` (`id`);
-ALTER TABLE `employees` ADD FOREIGN KEY (manager_id) REFERENCES `employees` (`id`);
-ALTER TABLE `role` ADD FOREIGN KEY (department_id) REFERENCES `departments` (`id`);
-
+ALTER TABLE `employee` ADD FOREIGN KEY (role_id) REFERENCES `role` (`id`);
+ALTER TABLE `employee` ADD FOREIGN KEY (manager_id) REFERENCES `employee` (`id`);
+ALTER TABLE `role` ADD FOREIGN KEY (department_id) REFERENCES `department` (`id`);
 

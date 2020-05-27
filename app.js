@@ -8,6 +8,42 @@ const cTable = require('console.table');
 var figlet = require('figlet');
 let cont = true;
 
+var connection = mysql.createConnection({
+    host: "localhost",
+    port: 3306,
+    user: "root",
+    password: "password",
+    database: "employee_db"
+});
+
+const getEmployees = () => {
+    connection.query("SELECT * FROM employee_db.employees", function (err, res) {
+      let employees = []
+      if (err) throw err;
+      for (let employee of res) { 
+          employees.push(employee);
+          // console.log(employee.first_name, employee.last_name);
+      }
+      return employees;
+    })
+}
+
+const getEmployeesString = () => {
+    connection.query("SELECT * FROM employee_db.employees", function (err, res) {
+      let employees = []
+      if (err) throw err;
+      for (let employee of res) {
+          let employeeName = `${employee.first_name} ${employee.last_name}`; 
+          employees.push(employeeName);
+          // console.log(employee.first_name, employee.last_name);
+      }
+      return employees;
+    })
+}
+
+let databaseEmployees = getEmployees(); 
+let employeesStringArray = getEmployeesString();
+
 let initialQuestions = {
     type: "list",
     message: "What would you like to do?",
@@ -25,7 +61,7 @@ let initialQuestions = {
     ]
 }
 
-addEmployeeQuestions = [
+let addEmployeeQuestions = [
     {
         type: "input",
         message: "What's this employee's first name?",
@@ -37,9 +73,19 @@ addEmployeeQuestions = [
         name: "lastName"
     },
     {
-        type: "input",
+        type: "list",
         message: "What's this employee's role?",
-        name: "role"
+        name: "role",
+        choices: [
+            "Accountant",
+            "Account Manager",
+            "Lawyer",
+            "Legal Team Lead",
+            "Lead Engineer",
+            "Software Engineer",
+            "Sales Lead",
+            "Sales Person"
+        ]
     },
     {
         type: "input",
@@ -49,14 +95,14 @@ addEmployeeQuestions = [
 
 ]
 
-var connection = mysql.createConnection({
-    host: "localhost",
-    port: 3306,
-    user: "root",
-    password: "password",
-    database: "employee_db"
-});
-
+let removeEmployeeQuestions = [
+    {
+        type: "list",
+        message:"Who would you like to remove?",
+        name: "removeEmployee",
+        choices: getEmployeesString()
+    }
+]
 
 const viewAllEmployess = () => {
     connection.query("SELECT * FROM employee_db.employees", function (err, res) {
@@ -66,7 +112,7 @@ const viewAllEmployess = () => {
 })}
 
 const viewEmployeesByDepartment = () => {
-    connection.query("SELECT * FROM employee_db.employees", function (err, res) {
+    connection.query("SELECT * FROM employee_db.department", function (err, res) {
         if (err) throw err;
         console.table(res);
         connection.end();
@@ -87,8 +133,10 @@ const addEmployee = (data) => {
         connection.end();
 })}
 
-const removeEmployee = () => {
-    connection.query("SELECT * FROM employee_db.employees", function (err, res) {
+const removeEmployee = (data) => {
+    const sqlQuery = "DELETE FROM employees WHERE ?";
+    const params = [{ first_name: data.firstName}, { last_name: data.lastName }];
+    connection.query(sqlQuery, params, function (err, res) {
         if (err) throw err;
         console.table(res);
         connection.end();
@@ -154,7 +202,8 @@ const main = async () => {
                     addEmployee(addEmployeeData);
                     break;
                 case "Remove employee":
-                    removeEmployee();
+                    const removeEmployeeData = await inquirer.prompt(removeEmployeeQuestions);
+                    removeEmployee(removeEmployeeData);
                     break;
                 case "Update employee role":
                     updateEmployeeRole();
@@ -165,8 +214,10 @@ const main = async () => {
                 case "View all roles":
                     viewAllRoles();
                     break;
-                case "Quit":
+                default:
                     cont = false;
+                    connection.end();
+                    process.exit(0);
                     break;     
             }
         }
@@ -187,4 +238,4 @@ main();
 
 //How do I get it to stop asking questions?
 //How do I get all queries correct?
-//How do I get the roles to match up with the IDs, title and salaries because they pull from different tables, when adding a new employee?
+//How do I get the roles to match up with the IDs, title, managers and salaries because they pull from different tables, when adding a new employee?
