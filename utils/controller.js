@@ -1,3 +1,19 @@
+const mysql = require("mysql2");
+const inquirer = require("inquirer");
+
+var connection = mysql.createConnection({
+    host: "localhost",
+    port: 3306,
+    user: "root",
+    password: "password",
+    database: "employee_db"
+});
+
+connection.connect(function (err) {
+    if (err) throw err;
+    console.log("connected as id " + connection.threadId);
+});
+
 function getManagers() {
     const promise = new Promise((resolve, reject) => {
         let sqlQuery = `SELECT first_name, last_name, id FROM employee_db.employee WHERE manager_id IS NULL;`;
@@ -167,7 +183,7 @@ async function updateEmployeeRole() {
             {
                 type: "list",
                 name: "role",
-                choices: roles.map(r => ({name:r.title, value: r.id}))
+                choices: roles.map(r => ({ name: r.title, value: r.id }))
             }
         ]
     )
@@ -185,12 +201,15 @@ async function updateEmployeeRole() {
 
 
 function viewRoles() {
-    let sqlQuery = "SELECT * FROM role;";
-    connection.query(sqlQuery, function (err, res) {
-        if (err) throw err;
-        console.table(res);
-        connection.end();
+    const promise = new Promise((resolve, reject) => {
+        let sqlQuery = "SELECT * FROM role;";
+        connection.query(sqlQuery, function (err, res) {
+            if (err) reject(err);
+            console.table(res);
+            resolve();
+        })
     })
+    return promise;
 }
 
 async function updateEmployeeManager() {
@@ -223,8 +242,25 @@ async function updateEmployeeManager() {
     return;
 }
 
+async function sumSalaries() {
+    const promise = new Promise((resolve, reject) => {
+        let sqlQuery = "SELECT SUM(role.salary) FROM employee JOIN role ON employee.role_id=role.id;";
+        connection.query(sqlQuery, function (err, res) {
+            if (err) reject(err);
+            console.table(res);
+            resolve();
+        })
+    })
+    return promise;
+}
+
+async function quit() {
+    connection.end();
+    process.exit();
+}
+
 module.exports = {
-    addEmployee, 
+    addEmployee,
     getEmployees,
     getManagers,
     getRoles,
@@ -235,4 +271,6 @@ module.exports = {
     viewEmployeesByDepartment,
     viewAllEmployees,
     updateEmployeeManager,
+    sumSalaries,
+    quit,
 }
